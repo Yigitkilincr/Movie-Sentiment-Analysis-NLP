@@ -2,11 +2,14 @@ import pandas as pd
 import os
 import numpy as np
 import tensorflow as tf
+import joblib
 from flask import Flask, jsonify, request
 from src.preprocessing import preprocess_data
-from src.feature_extraction import get_bag_of_words_features
+from src.feature_extraction import get_hashing_features
 from src.model_training import train_cnn_model
 from src.model_evaluation import evaluate_model
+
+
 
 app = Flask(__name__)
 '''
@@ -26,20 +29,21 @@ preprocessed_data.to_csv('data/processed/IMDB Processed Data.csv', index=False)
 '''
 
 ##Train CNN model
-preprocessed_data = pd.read_csv('data/processed/IMDB Processed Data.csv')
+preprocessed_data = pd.read_csv('data/processed/IMDB Processed Data.csv') #Note : Do not forget to check your path that must be same path as data.
 
 labels = pd.get_dummies(preprocessed_data['sentiment']).values
-features = get_bag_of_words_features(preprocessed_data['review'], max_words=10000)
+features = get_hashing_features(preprocessed_data['review'])
 
+'''
 model, history = train_cnn_model(features, labels, num_classes=2)
-
+'''
 # Save trained model and word-to-index mapping
+'''
 model.save('models/cnn_model.h5')
-np.save('models/word_to_index.npy', get_bag_of_words_features.word_to_index)
-
+'''
 
 model = tf.keras.models.load_model('models/cnn_model.h5')
-word_to_index = np.load('models/word_to_index.npy', allow_pickle=True).item()
+vectorizer = joblib.load('models/vectorizer.pkl')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -50,7 +54,7 @@ def predict():
     preprocessed_text = preprocess_data(text)
 
     # Create bag-of-words feature vector
-    features = get_bag_of_words_features([preprocessed_text], word_to_index)
+    features = get_hashing_features([preprocessed_text])
 
     # Make prediction using trained model
     prediction = model.predict(features)

@@ -3,7 +3,7 @@ import os
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
-def train_cnn_model(features, labels, num_classes, test_size=0.2, epochs=10, batch_size=32):
+def train_cnn_model(features, labels, num_classes, test_size=0.5, epochs=10, batch_size=32):
     """
     Trains a Convolutional Neural Network (CNN) model for sentiment analysis.
 

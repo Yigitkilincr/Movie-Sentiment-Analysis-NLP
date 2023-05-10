@@ -1,17 +1,17 @@
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
+import joblib
+from sklearn.feature_extraction.text import HashingVectorizer
 
-def get_bag_of_words_features(texts):
-    # Initialize CountVectorizer object with desired parameters
-    vectorizer = CountVectorizer(analyzer='word', token_pattern=r'\b\w+\b')
+def get_hashing_features(texts):
+    # Initialize HashingVectorizer object with desired parameters
+    vectorizer = HashingVectorizer(analyzer='word', token_pattern=r'\b\w+\b', n_features=10000)
 
-    # Fit vectorizer to texts and transform them into feature vectors
-    features = vectorizer.fit_transform(texts)
+    # Transform texts into feature vectors
+    features = vectorizer.transform(texts)
+    
+    joblib.dump(vectorizer, 'models/vectorizer.pkl')
 
     # Convert feature vectors to numpy array for easier manipulation
-    features = np.array(features.toarray())
+    features = np.array(features.toarray()).astype(np.float32)
 
-    # Get mapping of feature indices to feature names
-    vocabulary = vectorizer.vocabulary_
-
-    return features, vocabulary
+    return features
