@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IMDB Review Sentiment Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>IMDB Review Sentiment Analysis</h1>
+    <form method="POST" action="{{ url_for('predict') }}">
+        <label for="text">Enter a movie review:</label><br>
+        <textarea id="text" name="text" rows="5" cols="50"></textarea><br>
+        <input type="submit" value="Submit">
+    </form>
+    <br>
+    <h2>Results:</h2>
+    <p id="result"></p>
+    
+    <script>
+        const form = document.querySelector('form');
+        const result = document.getElementById('result');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/predict',{
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                result.textContent = `Sentiment: ${data.sentiment}`;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        });
+    </script>
+</body>
+</html>

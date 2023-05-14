@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    <h1>Results</h1>
+    <p>The sentiment of the text you entered is:</p>
+    {% if sentiment == 'positive' %}
+      <p class="positive">Positive</p>
+    {% else %}
+      <p class="negative">Negative</p>
+    {% endif %}
+    <a href="{{ url_for('index') }}">Enter another text</a>
+  </body>
+</html>
+  

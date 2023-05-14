@@ -3,16 +3,17 @@ import os
 import numpy as np
 import tensorflow as tf
 import joblib
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from src.preprocessing import preprocess_data
 from src.feature_extraction import get_hashing_features
 from src.model_training import train_cnn_model
 from src.model_evaluation import evaluate_model
 
-
-
 app = Flask(__name__)
 '''
+
+!!! Note !!! : You must run the commented part if you are running the app first time.
+
 ##Preprocess data
 raw_data = pd.read_csv('data/raw/IMDB Dataset.csv')
 print(raw_data.head())
@@ -25,30 +26,32 @@ if not os.path.exists('data/processed'):
     os.makedirs('data/processed')
 preprocessed_data.to_csv('data/processed/IMDB Processed Data.csv', index=False)
 
-##Preprocessing closed until bugs in the code are fixed
-'''
-
 ##Train CNN model
 preprocessed_data = pd.read_csv('data/processed/IMDB Processed Data.csv') #Note : Do not forget to check your path that must be same path as data.
 
 labels = pd.get_dummies(preprocessed_data['sentiment']).values
 features = get_hashing_features(preprocessed_data['review'])
 
-'''
+
 model, history = train_cnn_model(features, labels, num_classes=2)
-'''
+
 # Save trained model and word-to-index mapping
-'''
+
 model.save('models/cnn_model.h5')
 '''
 
+## Load pre-trained model and vectorizer
 model = tf.keras.models.load_model('models/cnn_model.h5')
 vectorizer = joblib.load('models/vectorizer.pkl')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
     # Get input text from request body
-    text = request.json['text']
+    text = request.form['text']
 
     # Preprocess input text
     preprocessed_text = preprocess_data(text)
@@ -61,20 +64,8 @@ def predict():
     prediction = np.argmax(prediction, axis=1)
 
     # Return prediction result as JSON object
-    return jsonify({'sentiment': 'positive' if prediction == 1 else 'negative'})
-
-@app.route('/evaluate', methods=['POST'])
-def evaluate():
-    # Load test set and labels
-    test_features = np.load('data/processed/test_features.npy')
-    test_labels = np.load('data/processed/test_labels.npy')
-
-    # Evaluate performance of trained model on test set
-    metrics = evaluate_model(model, test_features, test_labels)
-
-    # Return evaluation metrics as JSON object
-    return jsonify(metrics)
+    sentiment = 'positive' if prediction == 1 else 'negative'
+    return jsonify(sentiment=sentiment)
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    app.run(host='0.0.0.0', port=5000)

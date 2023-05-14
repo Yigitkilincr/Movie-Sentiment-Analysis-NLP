@@ -9,7 +9,7 @@ def get_hashing_features(texts):
     # Transform texts into feature vectors
     features = vectorizer.transform(texts)
     
-    joblib.dump(vectorizer, 'models/vectorizer.pkl')
+    joblib.dump(vectorizer, 'models/vectorizer.pkl') # With vectorizer we don't need to use a word_to_index method
 
     # Convert feature vectors to numpy array for easier manipulation
     features = np.array(features.toarray()).astype(np.float32)
